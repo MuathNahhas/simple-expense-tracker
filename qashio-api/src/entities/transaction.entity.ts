@@ -19,7 +19,7 @@ export class Transaction {
   @Column({ type: 'enum', enum: TransactionType })
   type: TransactionType;
 
-  @Column({ type: 'date' })
+  @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   date: Date;
 
   @ManyToOne(() => Category, (category) => category.transactions, {
