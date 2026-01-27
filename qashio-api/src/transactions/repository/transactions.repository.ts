@@ -4,6 +4,7 @@ import { CreateTransactionDto } from '../dto/create-transaction.dto';
 import { UpdateTransactionDto } from '../dto/update-transaction.dto';
 import { RedisService } from '../../redis/redis.service';
 import { CACHE_TTL } from '../../common/constant';
+import { LogService } from '../../logger/logger-service';
 
 @Injectable()
 export class TransactionsRepository {
@@ -11,6 +12,7 @@ export class TransactionsRepository {
   constructor(
     private readonly dbService: DatabaseService,
     private readonly redisService: RedisService,
+    protected readonly logger: LogService,
   ) {}
 
   private get repo() {
@@ -27,25 +29,26 @@ export class TransactionsRepository {
       category: { id: createTransactionDto.categoryId },
     });
     const newTransaction = await this.repo.save(transaction);
+    this.logger.log(
+      `create transaction with id:${newTransaction.id}`,
+      JSON.stringify(newTransaction),
+    );
     return this.findOne(newTransaction.id);
   }
 
   async findOne(transactionId: string) {
-    try {
-      const cacheKey = `transaction:${transactionId}`;
-      const cached = await this.redisService.getCache(cacheKey);
-      if (cached) {
-        return cached;
-      } else {
-        const result = await this.repo.findOneBy({ id: transactionId });
-        if (result) {
-          await this.redisService.setCache(cacheKey, result, CACHE_TTL.LONG);
-        }
-        return result;
-      }
-    } catch (error) {
-      throw new NotFoundException();
+    const cacheKey = `transaction:${transactionId}`;
+
+    const cached = await this.redisService.getCache(cacheKey);
+    if (cached) return cached;
+    const result = await this.repo.findOneBy({ id: transactionId });
+    if (!result) {
+      throw new NotFoundException(
+        `Transaction with ID ${transactionId} not found`,
+      );
     }
+    await this.redisService.setCache(cacheKey, result, CACHE_TTL.LONG);
+    return result;
   }
   async findAll(skip: number, limit: number) {
     return this.repo.find({
@@ -64,6 +67,7 @@ export class TransactionsRepository {
       throw new NotFoundException(`Transaction with ID ${id} not found`);
     }
     const updatedTransaction = await this.repo.save(transaction);
+    this.logger.log(`Transaction ${id} updated in database`);
     const cacheKey = `transaction:${id}`;
     await this.redisService.removeCache(cacheKey);
     return this.findOne(updatedTransaction.id);

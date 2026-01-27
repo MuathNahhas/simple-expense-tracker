@@ -10,6 +10,7 @@ import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis'
 import { TransactionsModule } from './transactions/transactions.module';
 import { CategoriesModule } from './categories/categories.module';
 import Redis from 'ioredis';
+import { LoggerModule } from './logger/logger.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -44,6 +45,7 @@ import Redis from 'ioredis';
     RedisModule,
     TransactionsModule,
     CategoriesModule,
+    LoggerModule,
   ],
   providers: [
     {

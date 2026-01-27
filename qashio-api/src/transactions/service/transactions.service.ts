@@ -27,46 +27,34 @@ export class TransactionsService {
   }
 
   async findAll(paginationQuery: PaginationQueryDto) {
-    try {
-      const { page = 1, limit = 10 } = paginationQuery;
-      const skip = (page - 1) * limit;
-      const [data, total] = await Promise.all([
-        this.transactionRepository.findAll(skip, limit),
-        this.getTransactionCount(),
-      ]);
-
-      return {
-        data,
-        pageData: {
-          totalItems: total,
-          totalPages: Math.ceil(total / limit),
-          currentPage: page,
-          itemsPerPage: limit,
-        },
-      };
-    } catch (error) {
-      throw new error();
-    }
+    const { page = 1, limit = 10 } = paginationQuery;
+    const skip = (page - 1) * limit;
+    const [data, total] = await Promise.all([
+      this.transactionRepository.findAll(skip, limit),
+      this.getTransactionCount(),
+    ]);
+    return {
+      data,
+      meta: {
+        totalItems: total,
+        totalPages: Math.ceil(total / limit),
+        currentPage: page,
+        itemsPerPage: limit,
+      },
+    };
   }
-
   async update(id: string, updateDto: UpdateTransactionDto) {
-    try {
-      const { categoryId, ...rest } = updateDto;
-
-      const updateData: UpdateTransactionDto = { ...rest };
-
-      if (categoryId) {
-        const category = await this.categoryService.findOne(categoryId);
-        if (!category) {
-          throw new NotFoundException(`Category ${categoryId} not found`);
-        }
-        updateData.categoryId = categoryId;
+    const { categoryId, ...rest } = updateDto;
+    const updateData: UpdateTransactionDto = { ...rest };
+    if (categoryId) {
+      const category = await this.categoryService.findOne(categoryId);
+      if (!category) {
+        throw new NotFoundException(`Category ${categoryId} not found`);
       }
-      const updated = await this.transactionRepository.update(id, updateData);
-      return updated;
-    } catch (error) {
-      throw error;
+      updateData.categoryId = categoryId;
     }
+    const updated = await this.transactionRepository.update(id, updateData);
+    return updated;
   }
 
   async remove(id: string) {
