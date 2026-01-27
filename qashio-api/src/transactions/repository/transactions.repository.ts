@@ -2,15 +2,25 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { DatabaseService } from '../../database/database.service';
 import { CreateTransactionDto } from '../dto/create-transaction.dto';
 import { UpdateTransactionDto } from '../dto/update-transaction.dto';
+import { RedisService } from '../../redis/redis.service';
+import { CACHE_TTL } from '../../common/constant';
 
 @Injectable()
 export class TransactionsRepository {
   private readonly tableName = 'transactions';
-  constructor(private readonly dbService: DatabaseService) {}
+  constructor(
+    private readonly dbService: DatabaseService,
+    private readonly redisService: RedisService,
+  ) {}
 
   private get repo() {
     return this.dbService.getRepository(this.tableName);
   }
+
+  public async getTransactionCount() {
+    return await this.repo.count();
+  }
+
   async create(createTransactionDto: CreateTransactionDto) {
     const transaction = this.repo.create({
       ...createTransactionDto,
@@ -21,10 +31,28 @@ export class TransactionsRepository {
   }
 
   async findOne(transactionId: string) {
-    return await this.repo.findOneBy({ id: transactionId });
+    try {
+      const cacheKey = `transaction:${transactionId}`;
+      const cached = await this.redisService.getCache(cacheKey);
+      if (cached) {
+        return cached;
+      } else {
+        const result = await this.repo.findOneBy({ id: transactionId });
+        if (result) {
+          await this.redisService.setCache(cacheKey, result, CACHE_TTL.LONG);
+        }
+        return result;
+      }
+    } catch (error) {
+      throw new NotFoundException();
+    }
   }
-  async findAll() {
-    return await this.repo.find();
+  async findAll(skip: number, limit: number) {
+    return this.repo.find({
+      skip,
+      take: limit,
+      order: { created_at: 'DESC' },
+    });
   }
 
   async update(id: string, updateTransactionDto: UpdateTransactionDto) {
@@ -36,14 +64,18 @@ export class TransactionsRepository {
       throw new NotFoundException(`Transaction with ID ${id} not found`);
     }
     const updatedTransaction = await this.repo.save(transaction);
+    const cacheKey = `transaction:${id}`;
+    await this.redisService.removeCache(cacheKey);
     return this.findOne(updatedTransaction.id);
   }
-
   async remove(id: string) {
+    const cacheKey = `transaction:${id}`;
     const transaction = await this.repo.findOneBy({ id });
     if (!transaction) {
       throw new NotFoundException(`Transaction with ID ${id} not found`);
     }
-    return await this.repo.softRemove(transaction);
+    const removedTransaction = await this.repo.softRemove(transaction);
+    await this.redisService.removeCache(cacheKey);
+    return removedTransaction;
   }
 }

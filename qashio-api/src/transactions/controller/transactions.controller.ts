@@ -6,10 +6,12 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { TransactionsService } from '../service/transactions.service';
 import { CreateTransactionDto } from '../dto/create-transaction.dto';
 import { UpdateTransactionDto } from '../dto/update-transaction.dto';
+import { PaginationQueryDto } from '../dto/pagination-query.dto';
 
 @Controller('transactions')
 export class TransactionsController {
@@ -26,8 +28,8 @@ export class TransactionsController {
   }
 
   @Get('all-transactions')
-  findAll() {
-    return this.transactionService.findAll();
+  findAll(@Query() paginationQuery: PaginationQueryDto) {
+    return this.transactionService.findAll(paginationQuery);
   }
 
   @Patch(':id')

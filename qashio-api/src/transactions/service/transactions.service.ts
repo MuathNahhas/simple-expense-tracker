@@ -3,6 +3,7 @@ import { TransactionsRepository } from '../repository/transactions.repository';
 import { CreateTransactionDto } from '../dto/create-transaction.dto';
 import { CategoriesService } from '../../categories/service/categories.service';
 import { UpdateTransactionDto } from '../dto/update-transaction.dto';
+import { PaginationQueryDto } from '../dto/pagination-query.dto';
 
 @Injectable()
 export class TransactionsService {
@@ -25,8 +26,27 @@ export class TransactionsService {
     return transaction;
   }
 
-  findAll() {
-    return this.transactionRepository.findAll();
+  async findAll(paginationQuery: PaginationQueryDto) {
+    try {
+      const { page = 1, limit = 10 } = paginationQuery;
+      const skip = (page - 1) * limit;
+      const [data, total] = await Promise.all([
+        this.transactionRepository.findAll(skip, limit),
+        this.getTransactionCount(),
+      ]);
+
+      return {
+        data,
+        pageData: {
+          totalItems: total,
+          totalPages: Math.ceil(total / limit),
+          currentPage: page,
+          itemsPerPage: limit,
+        },
+      };
+    } catch (error) {
+      throw new error();
+    }
   }
 
   async update(id: string, updateDto: UpdateTransactionDto) {
@@ -51,5 +71,9 @@ export class TransactionsService {
 
   async remove(id: string) {
     return this.transactionRepository.remove(id);
+  }
+
+  async getTransactionCount() {
+    return await this.transactionRepository.getTransactionCount();
   }
 }

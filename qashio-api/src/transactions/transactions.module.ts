@@ -4,9 +4,10 @@ import { TransactionsService } from './service/transactions.service';
 import { TransactionsRepository } from './repository/transactions.repository';
 import { DatabaseModule } from '../database/database.module';
 import { CategoriesModule } from '../categories/categories.module';
+import { RedisModule } from '../redis/redis.module';
 
 @Module({
-  imports: [DatabaseModule, CategoriesModule],
+  imports: [DatabaseModule, CategoriesModule, RedisModule],
   controllers: [TransactionsController],
   providers: [TransactionsService, TransactionsRepository],
 })
