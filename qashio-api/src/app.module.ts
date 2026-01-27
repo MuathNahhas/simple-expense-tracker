@@ -7,6 +7,8 @@ import { APP_GUARD } from '@nestjs/core';
 import { RedisModule } from './redis/redis.module';
 import redisConfig from './config/redis.config';
 import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis';
+import { TransactionsModule } from './transactions/transactions.module';
+import { CategoriesModule } from './categories/categories.module';
 import Redis from 'ioredis';
 @Module({
   imports: [
@@ -40,6 +42,8 @@ import Redis from 'ioredis';
       }),
     }),
     RedisModule,
+    TransactionsModule,
+    CategoriesModule,
   ],
   providers: [
     {

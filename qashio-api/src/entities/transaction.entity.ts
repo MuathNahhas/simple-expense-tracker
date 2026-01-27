@@ -5,6 +5,7 @@ import {
   ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
+  DeleteDateColumn,
 } from 'typeorm';
 import { Category } from './category.entity';
 import { TransactionType } from '../transactions/enum/transaction-type.enum';
@@ -35,4 +36,7 @@ export class Transaction {
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  @DeleteDateColumn()
+  deleted_at: Date;
 }
