@@ -3,6 +3,7 @@ import {
     Table, TableBody, TableCell, TableContainer, TableHead,
     TableRow, Paper, Chip, Typography, TablePagination, Box, Skeleton
 } from '@mui/material';
+import dayjs from "dayjs";
 
 const getStatusChip = (status: string) => {
     const config: any = {
@@ -42,7 +43,7 @@ export default function TransactionTable({ data, isLoading, page, onPageChange }
 
     const transactions = rawTransactions.map((transaction: any) => ({
         ...transaction,
-        status: transaction.status || statusTest[Math.floor(Math.random() * statusTest.length)],
+        status: statusTest[0],
     }));
 
     return (
@@ -68,10 +69,10 @@ export default function TransactionTable({ data, isLoading, page, onPageChange }
                                     </TableCell>
                                     <TableCell>
                                         <Typography variant="body2" color="text.secondary">
-                                            {row.category?.name || 'Uncategorized'}
+                                            {row.category?.name}
                                         </Typography>
                                     </TableCell>
-                                    <TableCell>{new Date(row.date).toLocaleDateString('en-GB')}</TableCell>
+                                    <TableCell>{dayjs(row.date).format('DD/MM/YYYY')}</TableCell>
                                     <TableCell align="right" sx={{ fontWeight: 600 }}>
                                         {row.amount?.toLocaleString()} $
                                     </TableCell>
