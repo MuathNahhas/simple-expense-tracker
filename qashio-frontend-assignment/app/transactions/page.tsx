@@ -1,10 +1,13 @@
 'use client';
 import React, { useState } from 'react';
-import { Container, Typography, Box } from '@mui/material';
-import {useTransactions} from "@/app/hooks/userTransactions";
+import {Container, Typography, Box, Snackbar, Alert} from "@mui/material";
+import {useCreateTransaction, useTransactions} from "@/app/hooks/userTransactions";
 import TransactionTable from '../components/transactions/TransactionTable';
 import TransactionFilters from '../components/transactions/TransactionFilter';
 import { useDebounce } from 'use-debounce';
+import TransactionModal from "@/app/components/transactions/TransactionModal";
+import NavBar from "@/app/components/NavBar";
+import {useCategories} from "@/app/hooks/useCategories";
 export default function TransactionsPage() {
     const [page, setPage] = useState(0);
     const [filters, setFilters] = useState({
@@ -13,15 +16,43 @@ export default function TransactionsPage() {
         type: '',
     });
 
-
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const [debouncedSearch] = useDebounce(filters.search, 1000);
     const { data, isLoading } = useTransactions({
         ...filters,
         search: debouncedSearch,
         page: page
     });
+    const { data: categories } = useCategories();
+    const { mutate, isPending } = useCreateTransaction();
+    const [snackbar, setSnackbar] = useState({
+        open: false,
+        message: '',
+        severity: 'success' as 'success' | 'error'
+    });
 
-    const updateFilter = (key: string, value: any) => {
+    const handleCloseSnackbar = () => {
+        setSnackbar({ ...snackbar, open: false });
+    };
+    const handleSaveTransaction = (formData: any) => {
+        mutate(formData, {
+            onSuccess: () => {
+                setIsModalOpen(false);
+                setSnackbar({
+                    open: true,
+                    message: 'Transaction added successfully!',
+                    severity: 'success'
+                });
+            },
+            onError: (error: any) => {
+                setSnackbar({
+                    open: true,
+                    message: error.response?.data?.message || 'Failed to add transaction',
+                    severity: 'error'
+                });
+            }
+        });
+    };    const updateFilter = (key: string, value: any) => {
         setFilters(prev => ({
             ...prev,
             [key]: value,
@@ -36,6 +67,23 @@ export default function TransactionsPage() {
     };
 
     return (
+        <>
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={4000}
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            >
+                <Alert
+                    onClose={handleCloseSnackbar}
+                    severity={snackbar.severity}
+                    variant="filled"
+                    sx={{ width: '100%', borderRadius: '8px' }}
+                >
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
+        <NavBar onAddClick={() => setIsModalOpen(true)} />
         <Container maxWidth="lg" sx={{ py: 4, bgcolor: '#F8F9FA', minHeight: '100vh' }}>
             <Box sx={{ mb: 4 }}>
                 <Typography variant="h4" fontWeight="700">Transactions</Typography>
@@ -56,6 +104,13 @@ export default function TransactionsPage() {
                 page={page}
                 onPageChange={(e, newPage) => setPage(newPage)}
             />
+            <TransactionModal
+                open={isModalOpen}
+                handleClose={() => setIsModalOpen(false)}
+                categories={categories || []}
+                onSave={handleSaveTransaction}
+            />
         </Container>
+            </>
     );
 }

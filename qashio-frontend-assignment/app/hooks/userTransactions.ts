@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery,useMutation,useQueryClient } from '@tanstack/react-query';
 import axios from "axios";
 import { TransactionsResponse } from "@/app/types";
 import dayjs from "dayjs";
@@ -19,6 +19,21 @@ const fetchTransactions = async (filters: any) => {
         params,
     });
     return data;
+};
+
+const createTransaction = async (newTransaction: any) => {
+    const { data } = await axios.post(`${baseURL}/transactions/create`, newTransaction);
+    return data;
+};
+export const useCreateTransaction = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: createTransaction,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['transactions'] });
+        },
+    });
 };
 export const useTransactions = (filters: any) => {
     return useQuery({

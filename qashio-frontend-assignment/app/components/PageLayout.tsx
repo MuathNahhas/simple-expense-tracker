@@ -11,13 +11,12 @@ interface PageLayoutProps {
 export default function PageLayout({ children }: PageLayoutProps) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <NavBar />
       <Container component="main" maxWidth="lg" sx={{ mt: 4, mb: 4, flexGrow: 1 }}>
-        <Paper 
-          elevation={2} 
-          sx={{ 
-            p: 4, 
-            display: 'flex', 
+        <Paper
+          elevation={2}
+          sx={{
+            p: 4,
+            display: 'flex',
             flexDirection: 'column',
             borderRadius: 2
           }}
@@ -25,13 +24,13 @@ export default function PageLayout({ children }: PageLayoutProps) {
           {children}
         </Paper>
       </Container>
-      <Box 
-        component="footer" 
-        sx={{ 
-          py: 3, 
-          bgcolor: 'background.paper', 
-          borderTop: '1px solid', 
-          borderColor: 'divider' 
+      <Box
+        component="footer"
+        sx={{
+          py: 3,
+          bgcolor: 'background.paper',
+          borderTop: '1px solid',
+          borderColor: 'divider'
         }}
       >
         <Container maxWidth="lg">
@@ -42,4 +41,4 @@ export default function PageLayout({ children }: PageLayoutProps) {
       </Box>
     </Box>
   );
-} 
+}
