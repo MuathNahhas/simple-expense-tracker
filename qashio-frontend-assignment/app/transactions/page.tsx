@@ -83,7 +83,7 @@ export default function TransactionsPage() {
                     {snackbar.message}
                 </Alert>
             </Snackbar>
-        <NavBar onAddClick={() => setIsModalOpen(true)} />
+                <NavBar onAddClick={() => setIsModalOpen(true)} />
         <Container maxWidth="lg" sx={{ py: 4, bgcolor: '#F8F9FA', minHeight: '100vh' }}>
             <Box sx={{ mb: 4 }}>
                 <Typography variant="h4" fontWeight="700">Transactions</Typography>
@@ -92,9 +92,9 @@ export default function TransactionsPage() {
 
             <TransactionFilters
                 search={filters.search}
-                onSearchChange={(val) => updateFilter('search', val)}
+                onSearchChange={(val:any) => updateFilter('search', val)}
                 type={filters.type}
-                onTransactionTypeChange={(val) => updateFilter('type', val)}
+                onTransactionTypeChange={(val:any) => updateFilter('type', val)}
                 onDateChange={handleDateChange}
             />
 
@@ -102,7 +102,8 @@ export default function TransactionsPage() {
                 data={data}
                 isLoading={isLoading}
                 page={page}
-                onPageChange={(e, newPage) => setPage(newPage)}
+                onPageChange={(e:any, newPage:any) => setPage(newPage)}
+                categories={categories}
             />
             <TransactionModal
                 open={isModalOpen}

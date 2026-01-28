@@ -21,12 +21,12 @@ const modalStyle = {
     p: 4,
 };
 
-export default function AddTransactionModal({ open, handleClose, categories, onSave, isLoading }) {
+export default function AddTransactionModal({ open, handleClose, categories, onSave, isLoading }:any) {
 
     const { control, handleSubmit, reset, formState: { errors } } = useForm({
         resolver: yupResolver(transactionSchema),
         defaultValues: {
-            amount: '',
+            amount: undefined,
             type: 'expense',
             date: dayjs(),
             categoryId: '',

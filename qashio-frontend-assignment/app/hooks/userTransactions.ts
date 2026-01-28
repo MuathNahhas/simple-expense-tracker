@@ -25,11 +25,24 @@ const createTransaction = async (newTransaction: any) => {
     const { data } = await axios.post(`${baseURL}/transactions/create`, newTransaction);
     return data;
 };
+const removeTransaction = async(id:number) => {
+    await axios.patch(`${baseURL}/transactions/remove/${id}`)
+};
 export const useCreateTransaction = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: createTransaction,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['transactions'] });
+        },
+    });
+};
+export const useRemoveTransaction = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: removeTransaction,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['transactions'] });
         },
