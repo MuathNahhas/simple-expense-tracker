@@ -12,4 +12,8 @@ export class CategoriesService {
   findOne(categoryId: string) {
     return this.categoryRepository.findOne(categoryId);
   }
+
+  findAll() {
+    return this.categoryRepository.findAll();
+  }
 }
