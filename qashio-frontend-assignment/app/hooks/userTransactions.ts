@@ -1,22 +1,30 @@
 import { useQuery } from '@tanstack/react-query';
 import axios from "axios";
-import {TransactionsResponse} from "@/app/types";
-
+import { TransactionsResponse } from "@/app/types";
+import dayjs from "dayjs";
 const baseURL = process.env.NEXT_PUBLIC_API_URL;
-const fetchTransactions = async (page:number, limit:number = 10) => {
+
+const fetchTransactions = async (filters: any) => {
+    const { page, limit = 10, search, type, startDate, endDate } = filters;
+
+    const params: any = {
+        page: page + 1,
+        limit,
+    };
+    if (search && search.trim() !== "") params.search = search;
+    if (type && type !== "" && type !== "All") params.type = type.toLowerCase();
+    if (startDate) params.startDate = dayjs(startDate).format('YYYY-MM-DD');
+    if (endDate) params.endDate = dayjs(endDate).format('YYYY-MM-DD');
     const { data } = await axios.get<TransactionsResponse>(`${baseURL}/transactions/all-transactions`, {
-        params: {
-            page,
-            limit,
-        },
+        params,
     });
     return data;
 };
-
-export const useTransactions = (page:number) => {
+export const useTransactions = (filters: any) => {
     return useQuery({
-        queryKey:['transactions',page],
-        queryFn: () => fetchTransactions(page),
-        placeholderData:(previousData)=>previousData
-    })
+        queryKey: ['transactions', { ...filters }],
+        queryFn: () => fetchTransactions(filters),
+        placeholderData: (previousData) => previousData,
+        enabled: true
+    });
 }
