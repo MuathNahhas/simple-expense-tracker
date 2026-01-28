@@ -4,6 +4,8 @@ import { CreateCategoryDto } from '../dto/create-category.dto';
 import { RedisService } from '../../redis/redis.service';
 import { CACHE_TTL } from '../../common/constant';
 import { LogService } from '../../logger/logger-service';
+import { CategoryResponseDto } from '../dto/category-response.dto';
+import { plainToInstance } from 'class-transformer';
 @Injectable()
 export class CategoriesRepository {
   private readonly tableName = 'categories';
@@ -39,5 +41,20 @@ export class CategoriesRepository {
     await this.redisService.setCache(cacheKey, result, CACHE_TTL.LONG);
 
     return result;
+  }
+
+  async findAll() {
+    const cacheKey = `category:all`;
+
+    const cached = await this.redisService.getCache(cacheKey);
+    if (cached) {
+      this.logger.log(`Cache Hit: Category`);
+      return plainToInstance(CategoryResponseDto, cached, { excludeExtraneousValues: true });
+    }
+    const result = await this.repo.find();
+    await this.redisService.setCache(cacheKey, result, CACHE_TTL.LONG);
+   return plainToInstance(CategoryResponseDto, result, {
+     excludeExtraneousValues: true,
+   });
   }
 }

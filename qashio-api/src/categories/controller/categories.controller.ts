@@ -18,8 +18,13 @@ export class CategoriesController {
     return this.categoriesService.create(createCategoryDto);
   }
 
-  @Get('/:id')
+  @Get('category/:id')
   findOne(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.categoriesService.findOne(id);
+  }
+
+  @Get('/all-category')
+  findAll() {
+    return this.categoriesService.findAll();
   }
 }
