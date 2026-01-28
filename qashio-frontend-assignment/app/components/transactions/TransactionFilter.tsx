@@ -4,7 +4,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import {TRANSACTION_TYPE_LIST} from "@/app/constant/typeTransaction";
 
 export default function TransactionFilters({ search, onSearchChange, type, onTransactionTypeChange
-                                                }) {
+                                                }:any) {
     return (
 
             <Stack direction="row" spacing={2} sx={{ mb: 3 }}>

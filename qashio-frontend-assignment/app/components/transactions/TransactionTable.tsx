@@ -1,9 +1,13 @@
 'use client';
 import {
     Table, TableBody, TableCell, TableContainer, TableHead,
-    TableRow, Paper, Chip, Typography, TablePagination, Box, Skeleton
-} from '@mui/material';
+    TableRow, Paper, Chip, Typography, TablePagination, Box, Skeleton, Button, Stack, ListItem, Alert, Snackbar
+} from "@mui/material";
 import dayjs from "dayjs";
+import {useRemoveTransaction} from "@/app/hooks/userTransactions";
+import React, {useState} from "react";
+import {UpdateTransactionModal} from "@/app/components/transactions/UpdateTransactionModal";
+
 
 const getStatusChip = (status: string) => {
     const config: any = {
@@ -14,9 +18,43 @@ const getStatusChip = (status: string) => {
     const { color, label } = config[status?.toLowerCase()] || { color: 'default', label: status };
     return <Chip label={label} color={color} size="small" />;
 };
+export default function TransactionTable({ data, isLoading, page, onPageChange,categories }:any) {
+    const { mutate: removeMutate } = useRemoveTransaction();
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedTransactionId, setSelectedTransactionId] = useState('')
+    const [snackbar, setSnackbar] = useState({
+        open: false,
+        message: '',
+        severity: 'success' as 'success' | 'error'
+    });
 
-export default function TransactionTable({ data, isLoading, page, onPageChange }) {
+    const handleEditClick = (id: string) => {
+        setSelectedTransactionId(id);
+        setIsModalOpen(true);
+    };
 
+    const handleCloseSnackbar = () => {
+        setSnackbar({ ...snackbar, open: false });
+    };
+    const handleRemove = (id: number) => {
+        removeMutate(id, {
+            onSuccess: () => {
+
+                setSnackbar({
+                    open: true,
+                    message: 'Transaction removed successfully!',
+                    severity: 'success'
+                });
+            },
+            onError: (error: any) => {
+                setSnackbar({
+                    open: true,
+                    message: error.response?.data?.message || 'Failed to remove transaction',
+                    severity: 'error'
+                });
+            }
+        });
+    };
     if (isLoading) {
         return (
 
@@ -47,6 +85,31 @@ export default function TransactionTable({ data, isLoading, page, onPageChange }
     }));
 
     return (
+        <>
+            <UpdateTransactionModal
+                open={isModalOpen}
+                handleClose={() => setIsModalOpen(false)}
+                transactionId={selectedTransactionId}
+                categories={categories}
+                onSaveSuccess={() => {
+                    setIsModalOpen(false);
+                }}
+            />
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={4000}
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            >
+                <Alert
+                    onClose={handleCloseSnackbar}
+                    severity={snackbar.severity}
+                    variant="filled"
+                    sx={{ width: '100%', borderRadius: '8px' }}
+                >
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
         <Paper sx={{ borderRadius: '12px', border: '1px solid #E0E0E0', overflow: 'hidden' }}>
             <TableContainer>
                 <Table>
@@ -58,6 +121,7 @@ export default function TransactionTable({ data, isLoading, page, onPageChange }
                             <TableCell sx={{ fontWeight: 600 }} align="right">Amount</TableCell>
                             <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
                             <TableCell sx={{ fontWeight: 600 }}>Description</TableCell>
+                            <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -82,6 +146,31 @@ export default function TransactionTable({ data, isLoading, page, onPageChange }
                                             {row.notes || '-'}
                                         </Typography>
                                     </TableCell>
+                                    <TableCell>
+                                        <Stack
+                                            spacing={{ xs: 1, sm: 2 }}
+                                            direction="row"
+                                            useFlexGap
+                                            sx={{ flexWrap: 'wrap' }}
+                                        >
+                                            <div>
+
+                                                <Button  onClick={()=>handleEditClick(row.id)}  size="small" variant="contained"
+                                                          sx={{borderRadius:4,fontSize: '0.65rem',
+                                                            padding: '2px 8px',
+                                                            minWidth: '64px',
+                                                          }}
+                                                >
+                                                    Update
+                                                </Button>
+                                            </div>
+                                            <div><Button onClick={() => handleRemove(row.id)}  size="small" variant="contained" color="error" sx={{borderRadius:4,fontSize: '0.65rem',
+                                                padding: '2px 8px',
+                                                minWidth: '64px',
+                                            }}>Remove</Button>
+                                            </div>
+                                                </Stack>
+                                    </TableCell>
                                 </TableRow>
                             ))
                         ) : (
@@ -103,5 +192,6 @@ export default function TransactionTable({ data, isLoading, page, onPageChange }
                 onPageChange={onPageChange}
             />
         </Paper>
+        </>
     );
 }
