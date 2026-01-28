@@ -52,7 +52,7 @@ export class TransactionsRepository {
     return result;
   }
   private applyTransactionFilters(query: any, filters: any) {
-    const { search, type} = filters;
+    const { search, type } = filters;
     if (search) {
       const amount = Number(filters.search);
       if (!isNaN(amount)) {
@@ -82,7 +82,11 @@ export class TransactionsRepository {
       );
     }
 
-    if (filters.type && filters.type !== TransactionType.ALL_TYPE && filters.type !== '') {
+    if (
+      filters.type &&
+      filters.type !== TransactionType.ALL_TYPE &&
+      filters.type !== ''
+    ) {
       query.andWhere('transaction.type = :type', {
         type: filters.type.toLowerCase(),
       });
