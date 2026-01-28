@@ -1,5 +1,6 @@
-import { IsOptional, IsInt, Min } from 'class-validator';
+import { IsOptional, IsInt, Min, IsEnum } from 'class-validator';
 import { Type } from 'class-transformer';
+import { TransactionType } from '../enum/transaction-type.enum';
 
 export class PaginationQueryDto {
   @IsOptional()
@@ -13,4 +14,11 @@ export class PaginationQueryDto {
   @IsInt()
   @Min(1)
   limit?: number = 10;
+
+  @IsOptional()
+  search?: string;
+
+  @IsOptional()
+  @IsEnum(TransactionType)
+  type?: TransactionType;
 }
