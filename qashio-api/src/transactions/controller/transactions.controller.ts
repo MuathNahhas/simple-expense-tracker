@@ -29,7 +29,7 @@ export class TransactionsController {
 
   @Get('all-transactions')
   findAll(@Query() paginationQuery: PaginationQueryDto) {
-    return this.transactionService.findAll(paginationQuery);
+    return this.transactionService.getFilteredTransactions(paginationQuery);
   }
 
   @Patch(':id')

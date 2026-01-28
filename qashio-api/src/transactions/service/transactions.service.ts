@@ -26,20 +26,33 @@ export class TransactionsService {
     return transaction;
   }
 
-  async findAll(paginationQuery: PaginationQueryDto) {
-    const { page = 1, limit = 10 } = paginationQuery;
+  async getFilteredTransactions(paginationQuery: PaginationQueryDto) {
+    const {
+      page = 1,
+      limit = 10,
+      search,
+      type,
+    } = paginationQuery;
     const skip = (page - 1) * limit;
+
     const [data, total] = await Promise.all([
-      this.transactionRepository.findAll(skip, limit),
-      this.getTransactionCount(),
+      this.transactionRepository.findAllWithFilters(skip, limit, {
+        search,
+        type,
+      }),
+      this.transactionRepository.countWithFilters({
+        search,
+        type,
+      }),
     ]);
+
     return {
       data,
       meta: {
         totalItems: total,
         totalPages: Math.ceil(total / limit),
-        currentPage: page,
-        itemsPerPage: limit,
+        currentPage: Number(page),
+        itemsPerPage: Number(limit),
       },
     };
   }

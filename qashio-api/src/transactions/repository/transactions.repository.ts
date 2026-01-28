@@ -5,6 +5,7 @@ import { UpdateTransactionDto } from '../dto/update-transaction.dto';
 import { RedisService } from '../../redis/redis.service';
 import { CACHE_TTL } from '../../common/constant';
 import { LogService } from '../../logger/logger-service';
+import { TransactionType } from '../enum/transaction-type.enum';
 
 @Injectable()
 export class TransactionsRepository {
@@ -50,12 +51,57 @@ export class TransactionsRepository {
     await this.redisService.setCache(cacheKey, result, CACHE_TTL.LONG);
     return result;
   }
-  async findAll(skip: number, limit: number) {
-    return this.repo.find({
-      skip,
-      take: limit,
-      order: { created_at: 'DESC' },
-    });
+  private applyTransactionFilters(query: any, filters: any) {
+    const { search, type} = filters;
+    if (search) {
+      const amount = Number(filters.search);
+      if (!isNaN(amount)) {
+        query.andWhere('transaction.amount = :amount', { amount });
+      }
+      query.andWhere(
+        '(transaction.notes ILIKE :search OR CAST(transaction.type AS TEXT) ILIKE :search )',
+        { search: `%${search}%` },
+      );
+    }
+    if (type && type !== TransactionType.ALL_TYPE) {
+      query.andWhere('transaction.type = :type', { type });
+    }
+    return query;
+  }
+  async findAllWithFilters(skip: number, limit: number, filters: any) {
+    const query = this.repo.createQueryBuilder('transaction');
+    query.leftJoinAndSelect('transaction.category', 'category');
+    if (filters.search) {
+      const amount = Number(filters.search);
+      if (!isNaN(amount)) {
+        query.andWhere('transaction.amount = :amount', { amount });
+      }
+      query.andWhere(
+        '(transaction.notes ILIKE :search OR category.name ILIKE :search OR CAST(transaction.type AS TEXT) ILIKE :search)',
+        { search: `%${filters.search}%` },
+      );
+    }
+
+    if (filters.type && filters.type !== TransactionType.ALL_TYPE && filters.type !== '') {
+      query.andWhere('transaction.type = :type', {
+        type: filters.type.toLowerCase(),
+      });
+    }
+    return await query
+      .orderBy('transaction.date', 'DESC')
+      .skip(skip)
+      .take(limit)
+      .getMany();
+  }
+  async countWithFilters(filters: any): Promise<number> {
+    try {
+      const query = this.repo.createQueryBuilder('transaction');
+      this.applyTransactionFilters(query, filters);
+      return await query.getCount();
+    } catch (error) {
+      this.logger.error(`Error counting transactions: ${error.message}`);
+      throw error;
+    }
   }
 
   async update(id: string, updateTransactionDto: UpdateTransactionDto) {
