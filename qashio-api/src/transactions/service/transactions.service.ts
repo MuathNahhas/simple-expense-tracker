@@ -27,12 +27,7 @@ export class TransactionsService {
   }
 
   async getFilteredTransactions(paginationQuery: PaginationQueryDto) {
-    const {
-      page = 1,
-      limit = 10,
-      search,
-      type,
-    } = paginationQuery;
+    const { page = 1, limit = 10, search, type } = paginationQuery;
     const skip = (page - 1) * limit;
 
     const [data, total] = await Promise.all([
