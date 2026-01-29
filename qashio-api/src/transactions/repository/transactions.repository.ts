@@ -9,6 +9,7 @@ import {
   CACHE_TTL,
 } from '../../common/constant';
 import { LogService } from '../../logger/logger-service';
+import { Brackets } from 'typeorm';
 
 @Injectable()
 export class TransactionsRepository {
@@ -56,39 +57,59 @@ export class TransactionsRepository {
   }
   private applyTransactionFilters(query: any, filters: any) {
     const { search, type, status } = filters;
+
     if (search) {
-      const amount = Number(filters.search);
-      if (!isNaN(amount)) {
-        query.andWhere('transaction.amount = :amount', { amount });
-      }
+      const amount = Number(search);
+      const searchValue = `%${search}%`;
+
       query.andWhere(
-        '(transaction.notes ILIKE :search OR transaction.status ILIKE :search OR  CAST(transaction.type AS TEXT) ILIKE :search )',
-        { search: `%${search}%` },
+        new Brackets((qb) => {
+          qb.where('transaction.notes ILIKE :search', { search: searchValue })
+            .orWhere('transaction.status ILIKE :search', {
+              search: searchValue,
+            })
+            .orWhere('CAST(transaction.type AS TEXT) ILIKE :search', {
+              search: searchValue,
+            });
+          if (!isNaN(amount)) {
+            qb.orWhere('transaction.amount = :amount', { amount });
+          }
+        }),
       );
     }
 
     if (status && status !== ALL_STATUS_TRANSACTION) {
       query.andWhere('transaction.status = :status', { status });
     }
+
     if (type && type !== ALL_TYPE_TRANSACTION) {
       query.andWhere('transaction.type = :type', { type });
     }
+
     return query;
   }
   async findAllWithFilters(skip: number, limit: number, filters: any) {
     const query = this.repo.createQueryBuilder('transaction');
     query.leftJoinAndSelect('transaction.category', 'category');
+
     if (filters.search) {
       const amount = Number(filters.search);
-      if (!isNaN(amount)) {
-        query.andWhere('transaction.amount = :amount', { amount });
-      }
+      const search = `%${filters.search}%`;
+
       query.andWhere(
-        '(transaction.notes ILIKE :search OR transaction.status ILIKE :search OR category.name ILIKE :search OR CAST(transaction.type AS TEXT) ILIKE :search)',
-        { search: `%${filters.search}%` },
+        new Brackets((qb) => {
+          qb.where('transaction.notes ILIKE :search', { search })
+            .orWhere('transaction.status ILIKE :search', { search })
+            .orWhere('category.name ILIKE :search', { search })
+            .orWhere('CAST(transaction.type AS TEXT) ILIKE :search', {
+              search,
+            });
+          if (!isNaN(amount)) {
+            qb.orWhere('transaction.amount = :amount', { amount });
+          }
+        }),
       );
     }
-
     if (
       filters.type &&
       filters.type !== ALL_TYPE_TRANSACTION &&
@@ -98,7 +119,6 @@ export class TransactionsRepository {
         type: filters.type.toLowerCase(),
       });
     }
-
     if (
       filters.status &&
       filters.status !== ALL_STATUS_TRANSACTION &&
@@ -108,6 +128,7 @@ export class TransactionsRepository {
         status: filters.status,
       });
     }
+
     return await query
       .orderBy('transaction.date', 'DESC')
       .skip(skip)
