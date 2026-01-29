@@ -1,5 +1,5 @@
 
-import { useQuery } from '@tanstack/react-query';
+import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import axios from 'axios';
 
 export const useCategories = () => {
@@ -13,3 +13,18 @@ export const useCategories = () => {
         refetchOnWindowFocus: false,
     });
 };
+const createCategory = async (name: string) => {
+    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/categories/create`, { name });
+    return response.data;
+};
+
+export function useCreateCategory() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: createCategory,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['categories'] });
+        },
+    });
+}
