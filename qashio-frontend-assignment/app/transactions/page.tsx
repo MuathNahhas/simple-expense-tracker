@@ -14,10 +14,11 @@ export default function TransactionsPage() {
         page: 0,
         search: '',
         type: '',
+        status:''
     });
 
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [debouncedSearch] = useDebounce(filters.search, 1000);
+    const [debouncedSearch] = useDebounce(filters.search, 2500);
     const { data, isLoading } = useTransactions({
         ...filters,
         search: debouncedSearch,
@@ -96,6 +97,8 @@ export default function TransactionsPage() {
                 type={filters.type}
                 onTransactionTypeChange={(val:any) => updateFilter('type', val)}
                 onDateChange={handleDateChange}
+                onTransactionStatusChange={(val:any) => updateFilter('status', val)}
+                status={filters.status}
             />
 
             <TransactionTable

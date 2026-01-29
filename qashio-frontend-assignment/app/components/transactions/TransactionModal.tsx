@@ -9,6 +9,7 @@ import dayjs from 'dayjs';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { transactionSchema } from '../../schemas/transactionSchema';
+import {TRANSACTION_STATUS_LIST} from "@/app/constant/typeTransaction";
 const modalStyle = {
     position: 'absolute',
     top: '50%',
@@ -39,6 +40,7 @@ export default function AddTransactionModal({ open, handleClose, categories, onS
             ...data,
             date: dayjs(data.date).toISOString(),
         });
+        handleClose();
         reset();
     };
 
@@ -99,6 +101,30 @@ export default function AddTransactionModal({ open, handleClose, categories, onS
                                 {categories?.map((cat: any) => (
                                     <MenuItem key={cat.id} value={cat.id}>{cat.name}</MenuItem>
                                 ))}
+                            </TextField>
+                        )}
+                    />
+
+                    <Controller
+                        name="status"
+                        control={control}
+                        render={({ field }) => (
+                            <TextField
+                                {...field}
+                                select
+                                label="Status"
+                                fullWidth
+                                error={!!errors.status}
+                                helperText={errors.status?.message}
+                            >
+                                {TRANSACTION_STATUS_LIST
+                                    ?.filter((status: any) => status !== 'All')
+                                    .map((status: any) => (
+                                        <MenuItem key={status} value={status}>
+                                            {status}
+                                        </MenuItem>
+                                    ))
+                                }
                             </TextField>
                         )}
                     />

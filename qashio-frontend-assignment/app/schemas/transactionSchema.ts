@@ -11,5 +11,6 @@ export const transactionSchema = yup.object({
     categoryId: yup.string().required('Please select a category'),
     date: yup.mixed().required('Date is required'),
     notes: yup.string().max(200, 'Notes too long').nullable(),
+    status: yup.string().required('Status is required'),
 }).required();
 
