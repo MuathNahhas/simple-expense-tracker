@@ -58,7 +58,7 @@ export default function NavBar({ onAddClick }: NavBarProps) {
           </Snackbar>
     <AppBar position="static" elevation={0} sx={{ backgroundColor: "#FFFFFF" }}>
       <Toolbar>
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1,color:"#A78F65" }}>
+        <Typography variant="h6" component="div" sx={{ flexGrow: 1,color:"#A78F65",fontSize:"50px" }}>
           Qashio
         </Typography>
         <Box sx={{ my: 1, mx: 'auto', p: 2 }}>

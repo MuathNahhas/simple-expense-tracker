@@ -44,7 +44,7 @@ const db = new Low<DatabaseSchema>(adapter, { transactions: [] });
 // Initialize the database
 const initDb = async () => {
   await db.read();
-  
+
   // If db.data or transactions doesn't exist, initialize with empty array
   if (!db.data) {
     db.data = { transactions: [] };
@@ -72,48 +72,48 @@ export const transactionService = {
   query: async (filters: TransactionFilters) => {
     const database = await initDb();
     let result = [...database.data.transactions];
-    
+
     // Apply date range filter
     if (filters.startDate) {
       result = result.filter(t => new Date(t.date) >= new Date(filters.startDate!));
     }
-    
+
     if (filters.endDate) {
       result = result.filter(t => new Date(t.date) <= new Date(filters.endDate!));
     }
-    
+
     // Apply search term filter
     if (filters.searchTerm) {
       const term = filters.searchTerm.toLowerCase();
-      result = result.filter(t => 
-        t.reference.toLowerCase().includes(term) || 
+      result = result.filter(t =>
+        t.reference.toLowerCase().includes(term) ||
         t.counterparty.toLowerCase().includes(term)
       );
     }
-    
+
     // Apply sorting
     if (filters.sortBy) {
       const sortOrder = filters.sortOrder === 'desc' ? -1 : 1;
       result = result.sort((a, b) => {
         const aValue = a[filters.sortBy!];
         const bValue = b[filters.sortBy!];
-        
+
         if (typeof aValue === 'string' && typeof bValue === 'string') {
           return sortOrder * aValue.localeCompare(bValue);
         }
-        
+
         // @ts-ignore - We know these values are comparable
         return sortOrder * (aValue > bValue ? 1 : aValue < bValue ? -1 : 0);
       });
     }
-    
+
     // Calculate pagination
     const page = filters.page || 1;
     const limit = filters.limit || 10;
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
     const total = result.length;
-    
+
     // Return pagination metadata along with results
     return {
       data: result.slice(startIndex, endIndex),
@@ -133,10 +133,10 @@ export const transactionService = {
       id: uuidv4(),
       ...transaction
     };
-    
+
     database.data.transactions.push(newTransaction);
     await database.write();
-    
+
     return newTransaction;
   },
 
@@ -144,19 +144,19 @@ export const transactionService = {
   update: async (id: string, data: Partial<Omit<Transaction, 'id'>>) => {
     const database = await initDb();
     const index = database.data.transactions.findIndex(transaction => transaction.id === id);
-    
+
     if (index === -1) {
       return null;
     }
-    
+
     const updatedTransaction = {
       ...database.data.transactions[index],
       ...data
     };
-    
+
     database.data.transactions[index] = updatedTransaction;
     await database.write();
-    
+
     return updatedTransaction;
   },
 
@@ -164,14 +164,14 @@ export const transactionService = {
   delete: async (id: string) => {
     const database = await initDb();
     const index = database.data.transactions.findIndex(transaction => transaction.id === id);
-    
+
     if (index === -1) {
       return false;
     }
-    
+
     database.data.transactions.splice(index, 1);
     await database.write();
-    
+
     return true;
   }
-}; 
+};

@@ -129,6 +129,9 @@ export class TransactionsRepository {
     const transaction = await this.repo.preload({
       id,
       ...updateTransactionDto,
+      ...(updateTransactionDto.categoryId && {
+        category: { id: updateTransactionDto.categoryId },
+      }),
     });
     if (!transaction) {
       throw new NotFoundException(`Transaction with ID ${id} not found`);

@@ -3,6 +3,7 @@
 import { Container, Box, Paper } from '@mui/material';
 import NavBar from './NavBar';
 import { ReactNode } from 'react';
+import Sidebar from "@/app/components/layout/Sidebar";
 
 interface PageLayoutProps {
   children: ReactNode;
@@ -11,7 +12,8 @@ interface PageLayoutProps {
 export default function PageLayout({ children }: PageLayoutProps) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <Container component="main" maxWidth="lg" sx={{ mt: 4, mb: 4, flexGrow: 1 }}>
+      <Container component="main" maxWidth="lg" sx={{ mt: 4, mb: 4, flexGrow: 1,mr:5}}>
+        <Sidebar />
         <Paper
           elevation={2}
           sx={{
