@@ -18,10 +18,10 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { transactionSchema } from '../../schemas/transactionSchema';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import React, {useState} from "react";
+import {updateTransactionSchema} from "@/app/schemas/updateTransactionSchema";
 
 const modalStyle = {
     position: 'absolute' as const,
@@ -39,7 +39,7 @@ export function UpdateTransactionModal({open, handleClose, transactionId, catego
     const queryClient = useQueryClient();
 
     const {control, handleSubmit, reset, formState: {errors}} = useForm({
-        resolver: yupResolver(transactionSchema),
+        resolver: yupResolver(updateTransactionSchema),
         defaultValues: {
             amount: undefined,
             type: 'expense',
@@ -77,9 +77,10 @@ export function UpdateTransactionModal({open, handleClose, transactionId, catego
         }
     }, [transaction, reset]);
 
-    const updateMutation = useMutation({
+    const  updateMutation = useMutation({
         mutationFn: async (data: any) => {
-            return axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/transactions/${transactionId}`, {
+            console.log("dfsdfsdfsdfsd");
+            return await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/transactions/${transactionId}`, {
                 ...data,
                 date: dayjs(data.date).toISOString(),
             });
@@ -91,9 +92,9 @@ export function UpdateTransactionModal({open, handleClose, transactionId, catego
         }
     });
 
-    const onSubmit = (data: any) => updateMutation.mutate(data,{
+    const onSubmit = (data: any) => {
+        updateMutation.mutate(data,{
         onSuccess: () => {
-
             setSnackbar({
                 open: true,
                 message: 'Transaction updated successfully!',
@@ -107,7 +108,7 @@ export function UpdateTransactionModal({open, handleClose, transactionId, catego
                 severity: 'error'
             });
         }
-    });
+    })};
 
     return (
         <>

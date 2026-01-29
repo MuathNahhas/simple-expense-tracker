@@ -27,7 +27,7 @@ import { LoggerModule } from './logger/logger.module';
         throttlers: [
           {
             ttl: 10000,
-            limit: 6,
+            limit: 30,
           },
         ],
         storage: new ThrottlerStorageRedisService(
