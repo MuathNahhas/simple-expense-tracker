@@ -1,9 +1,9 @@
 'use client';
 import { Stack, TextField, MenuItem, InputAdornment } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import {TRANSACTION_TYPE_LIST} from "@/app/constant/typeTransaction";
+import {TRANSACTION_STATUS_LIST, TRANSACTION_TYPE_LIST} from "@/app/constant/typeTransaction";
 
-export default function TransactionFilters({ search, onSearchChange, type, onTransactionTypeChange
+export default function TransactionFilters({ search, onSearchChange, type, onTransactionTypeChange,onTransactionStatusChange,status
                                                 }:any) {
     return (
 
@@ -37,6 +37,21 @@ export default function TransactionFilters({ search, onSearchChange, type, onTra
                     {TRANSACTION_TYPE_LIST.map((type) => (
                         <MenuItem key={type} value={type}>
                             {type}
+                        </MenuItem>
+                    ))}
+                </TextField>
+
+                <TextField
+                    select
+                    label="Transaction Status"
+                    size="small"
+                    sx={{ width:"20%",minWidth:200, bgcolor: 'white' }}
+                    value={status||""}
+                    onChange={(e) => onTransactionStatusChange(e.target.value)}
+                >
+                    {TRANSACTION_STATUS_LIST.map((status) => (
+                        <MenuItem key={status} value={status}>
+                            {status}
                         </MenuItem>
                     ))}
                 </TextField>

@@ -5,7 +5,7 @@ import dayjs from "dayjs";
 const baseURL = process.env.NEXT_PUBLIC_API_URL;
 
 const fetchTransactions = async (filters: any) => {
-    const { page, limit = 10, search, type, startDate, endDate } = filters;
+    const { page, limit = 10, search, type, startDate, endDate, status } = filters;
 
     const params: any = {
         page: page + 1,
@@ -13,6 +13,7 @@ const fetchTransactions = async (filters: any) => {
     };
     if (search && search.trim() !== "") params.search = search;
     if (type && type !== "" && type !== "All") params.type = type.toLowerCase();
+    if (status && status !== "" && status !== "All") params.status = status.toLowerCase();
     if (startDate) params.startDate = dayjs(startDate).format('YYYY-MM-DD');
     if (endDate) params.endDate = dayjs(endDate).format('YYYY-MM-DD');
     const { data } = await axios.get<TransactionsResponse>(`${baseURL}/transactions/all-transactions`, {

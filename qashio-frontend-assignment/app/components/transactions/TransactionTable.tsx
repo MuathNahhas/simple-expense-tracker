@@ -1,7 +1,7 @@
 'use client';
 import {
     Table, TableBody, TableCell, TableContainer, TableHead,
-    TableRow, Paper, Chip, Typography, TablePagination, Box, Skeleton, Button, Stack, ListItem, Alert, Snackbar
+    TableRow, Paper, Chip, Typography, TablePagination, Box, Skeleton, Button, Stack, Alert, Snackbar
 } from "@mui/material";
 import dayjs from "dayjs";
 import {useRemoveTransaction} from "@/app/hooks/userTransactions";
@@ -13,7 +13,6 @@ const getStatusChip = (status: string) => {
     const config: any = {
         completed: { color: 'success', label: 'Completed' },
         pending: { color: 'warning', label: 'Pending' },
-        failed: { color: 'error', label: 'Failed' },
     };
     const { color, label } = config[status?.toLowerCase()] || { color: 'default', label: status };
     return <Chip label={label} color={color} size="small" />;
@@ -76,14 +75,7 @@ export default function TransactionTable({ data, isLoading, page, onPageChange,c
         );
     }
 
-    const rawTransactions = data?.data || [];
-    const statusTest = ['completed', 'pending', 'failed'];
-
-    const transactions = rawTransactions.map((transaction: any) => ({
-        ...transaction,
-        status: statusTest[0],
-    }));
-
+    const transactions = data?.data || [];
     return (
         <>
             <UpdateTransactionModal
