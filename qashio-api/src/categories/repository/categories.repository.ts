@@ -22,6 +22,12 @@ export class CategoriesRepository {
     const transaction = this.repo.create({
       ...createCategoryDto,
     });
+    const cacheKey = `category:all`;
+    const cached = await this.redisService.getCache(cacheKey);
+    if (cached) {
+      await this.redisService.removeCache(cacheKey);
+      this.logger.log('remove cached categories', JSON.stringify(transaction));
+    }
     this.logger.log('create category', JSON.stringify(transaction));
     return await this.repo.save(transaction);
   }
