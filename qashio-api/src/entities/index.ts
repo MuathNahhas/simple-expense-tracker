@@ -1,4 +1,4 @@
 import { Category } from './category.entity';
 import { Transaction } from './transaction.entity';
-
-export const entities = [Category, Transaction];
+import {User} from "./users.entity"
+export const entities = [Category, Transaction, User];
