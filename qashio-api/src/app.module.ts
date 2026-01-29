@@ -11,6 +11,8 @@ import { TransactionsModule } from './transactions/transactions.module';
 import { CategoriesModule } from './categories/categories.module';
 import Redis from 'ioredis';
 import { LoggerModule } from './logger/logger.module';
+import { UsersModule } from './users/users.module';
+import { AuthenticationModule } from './authentication/authentication.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -46,6 +48,8 @@ import { LoggerModule } from './logger/logger.module';
     TransactionsModule,
     CategoriesModule,
     LoggerModule,
+    UsersModule,
+    AuthenticationModule,
   ],
   providers: [
     {
