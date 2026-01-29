@@ -9,5 +9,7 @@ export const useCategories = () => {
             const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/categories/all-category`);
             return data;
         },
+        enabled: true,
+        refetchOnWindowFocus: false,
     });
 };

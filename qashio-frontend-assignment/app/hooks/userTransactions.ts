@@ -46,6 +46,7 @@ export const useRemoveTransaction = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['transactions'] });
         },
+
     });
 };
 export const useTransactions = (filters: any) => {
@@ -53,6 +54,7 @@ export const useTransactions = (filters: any) => {
         queryKey: ['transactions', { ...filters }],
         queryFn: () => fetchTransactions(filters),
         placeholderData: (previousData) => previousData,
-        enabled: true
+        enabled: true,
+        refetchOnWindowFocus: false,
     });
 }
