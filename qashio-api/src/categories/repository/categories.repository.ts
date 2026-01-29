@@ -49,12 +49,14 @@ export class CategoriesRepository {
     const cached = await this.redisService.getCache(cacheKey);
     if (cached) {
       this.logger.log(`Cache Hit: Category`);
-      return plainToInstance(CategoryResponseDto, cached, { excludeExtraneousValues: true });
+      return plainToInstance(CategoryResponseDto, cached, {
+        excludeExtraneousValues: true,
+      });
     }
     const result = await this.repo.find();
     await this.redisService.setCache(cacheKey, result, CACHE_TTL.LONG);
-   return plainToInstance(CategoryResponseDto, result, {
-     excludeExtraneousValues: true,
-   });
+    return plainToInstance(CategoryResponseDto, result, {
+      excludeExtraneousValues: true,
+    });
   }
 }

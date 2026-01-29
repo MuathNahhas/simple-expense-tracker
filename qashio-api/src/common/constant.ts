@@ -3,3 +3,6 @@ export const CACHE_TTL = {
   MEDIUM: 300, //5 Minute
   LONG: 3600, //1 Hour
 };
+
+export const ALL_TYPE_TRANSACTION = 'All';
+export const ALL_STATUS_TRANSACTION = 'All';

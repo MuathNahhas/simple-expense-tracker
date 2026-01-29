@@ -3,9 +3,12 @@ import { DatabaseService } from '../../database/database.service';
 import { CreateTransactionDto } from '../dto/create-transaction.dto';
 import { UpdateTransactionDto } from '../dto/update-transaction.dto';
 import { RedisService } from '../../redis/redis.service';
-import { CACHE_TTL } from '../../common/constant';
+import {
+  ALL_STATUS_TRANSACTION,
+  ALL_TYPE_TRANSACTION,
+  CACHE_TTL,
+} from '../../common/constant';
 import { LogService } from '../../logger/logger-service';
-import { TransactionType } from '../enum/transaction-type.enum';
 
 @Injectable()
 export class TransactionsRepository {
@@ -52,18 +55,22 @@ export class TransactionsRepository {
     return result;
   }
   private applyTransactionFilters(query: any, filters: any) {
-    const { search, type } = filters;
+    const { search, type, status } = filters;
     if (search) {
       const amount = Number(filters.search);
       if (!isNaN(amount)) {
         query.andWhere('transaction.amount = :amount', { amount });
       }
       query.andWhere(
-        '(transaction.notes ILIKE :search OR CAST(transaction.type AS TEXT) ILIKE :search )',
+        '(transaction.notes ILIKE :search OR transaction.status ILIKE :search OR  CAST(transaction.type AS TEXT) ILIKE :search )',
         { search: `%${search}%` },
       );
     }
-    if (type && type !== TransactionType.ALL_TYPE) {
+
+    if (status && status !== ALL_STATUS_TRANSACTION) {
+      query.andWhere('transaction.status = :status', { status });
+    }
+    if (type && type !== ALL_TYPE_TRANSACTION) {
       query.andWhere('transaction.type = :type', { type });
     }
     return query;
@@ -77,18 +84,28 @@ export class TransactionsRepository {
         query.andWhere('transaction.amount = :amount', { amount });
       }
       query.andWhere(
-        '(transaction.notes ILIKE :search OR category.name ILIKE :search OR CAST(transaction.type AS TEXT) ILIKE :search)',
+        '(transaction.notes ILIKE :search OR transaction.status ILIKE :search OR category.name ILIKE :search OR CAST(transaction.type AS TEXT) ILIKE :search)',
         { search: `%${filters.search}%` },
       );
     }
 
     if (
       filters.type &&
-      filters.type !== TransactionType.ALL_TYPE &&
+      filters.type !== ALL_TYPE_TRANSACTION &&
       filters.type !== ''
     ) {
       query.andWhere('transaction.type = :type', {
         type: filters.type.toLowerCase(),
+      });
+    }
+
+    if (
+      filters.status &&
+      filters.status !== ALL_STATUS_TRANSACTION &&
+      filters.status !== ''
+    ) {
+      query.andWhere('transaction.status = :status', {
+        status: filters.status,
       });
     }
     return await query
